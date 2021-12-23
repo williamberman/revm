@@ -9,29 +9,43 @@ repository = "https://github.com/bluealloy/revm"
 version = "1.0.0"
 
 [dependencies]
-auto_impl = {version = "0.5", default-features = false}
-bytes = {version = "1.1", default-features = false}
-hashbrown = {version = "0.11"}
-num_enum = {version = "0.5", default-features = false}#used for SpecId from u8 cast
-primitive-types = {version = "0.10", default-features = false, features = ["rlp"]}
-revm_precompiles = {path = "../revm_precompiles", version = "0.3", default-features = false}
-rlp = {version = "0.5", default-features = false}#used for create2 address calculation 
-sha3 = {version = "0.10", default-features = false}
-arrayref  = "0.3"
+auto_impl = { version = "0.5", default-features = false }
+bytes = { version = "1.1", default-features = false }
+hashbrown = { version = "0.11" }
+num_enum = { version = "0.5", default-features = false } #used for SpecId from u8 cast
+primitive-types = { version = "0.10", default-features = false, features = [
+    "rlp",
+] }
+revm_precompiles = { path = "../revm_precompiles", version = "0.3", default-features = false }
+rlp = { version = "0.5", default-features = false } #used for create2 address calculation 
+sha3 = { version = "0.10", default-features = false }
+
+tiny-keccak = { version = "2.0", features = ["keccak"] }
+arrayref = "0.3"
 #crypto-bigint = "0.3"
 zkp-u256 = "0.2.1"
 #needed for web3 db connector
-futures = {version="0.3.17", optional=true}
-parking_lot = {version="0.11.2", optional=true}
-tokio = {version = "1.14", features = ["rt-multi-thread", "macros"], optional=true}
-web3 = {version="0.17", optional=true}
+futures = { version = "0.3.17", optional = true }
+parking_lot = { version = "0.11.2", optional = true }
+tokio = { version = "1.14", features = [
+    "rt-multi-thread",
+    "macros",
+], optional = true }
+web3 = { version = "0.17", optional = true }
+lazy_static = "1.4"
 
 [dev-dependencies]
 hex = "0.4"
 
 [features]
-default = ["std","ecrecover"]
+default = ["std", "ecrecover"]
 no_gas_measuring = []
-std = ["bytes/std", "num_enum/std", "primitive-types/std", "sha3/std", "rlp/std"]
+std = [
+    "bytes/std",
+    "num_enum/std",
+    "primitive-types/std",
+    "sha3/std",
+    "rlp/std",
+]
 ecrecover = ["revm_precompiles/ecrecover"]
-web3db = ["futures","tokio","parking_lot","web3"]
+web3db = ["futures", "tokio", "parking_lot", "web3"]

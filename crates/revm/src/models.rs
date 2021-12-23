@@ -2,6 +2,7 @@ use core::cmp::min;
 
 use crate::{alloc::vec::Vec, SpecId};
 use bytes::Bytes;
+use lazy_static::lazy_static;
 use primitive_types::{H160, H256, U256};
 use sha3::{Digest, Keccak256};
 
@@ -10,6 +11,11 @@ pub const KECCAK_EMPTY: H256 = H256([
     0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b, 0x7b, 0xfa, 0xd8, 0x04, 0x5d, 0x85, 0xa4, 0x70,
 ]);
 
+lazy_static! {
+    pub static ref KECCAK_EMPTY_U256: U256 = {
+        U256::from_big_endian(&KECCAK_EMPTY.0)
+    };
+}
 /// AccountInfo account information.
 #[derive(Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "with-codec", derive(codec::Encode, codec::Decode))]

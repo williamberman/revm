@@ -1,32 +1,37 @@
 use super::gas;
+use crate::machine::STACK_LIMIT;
 use crate::{
     machine::Machine, CallContext, CallScheme, CreateScheme, Host, Return, Spec, Transfer,
 };
-use crate::{return_ok, return_revert};
-// 	CallScheme, Capture, CallContext, CreateScheme, ,
-// 	, Runtime, Transfer,
-// };
+use crate::{return_ok, return_revert, KECCAK_EMPTY_U256};
 use crate::{alloc::vec::Vec, spec::SpecId::*};
 use bytes::Bytes;
 use core::cmp::min;
 use primitive_types::{H160, H256, U256};
-use sha3::{Digest, Keccak256};
 
 pub fn sha3(machine: &mut Machine) -> Return {
     pop!(machine, from, len);
-    gas_or_fail!(machine, gas::sha3_cost(len));
     let len = as_usize_or_fail!(len, Return::OutOfGas);
-    let data = if len == 0 {
-        Bytes::new()
-        // TODO optimization, we can return hadrcoded value of keccak256:digest(&[])
+    gas_or_fail!(machine, gas::sha3_cost(len as u64));
+    if len == 0 {
+        push!(machine,*KECCAK_EMPTY_U256);
     } else {
         let from = as_usize_or_fail!(from, Return::OutOfGas);
         memory_resize!(machine, from, len);
-        Bytes::copy_from_slice(machine.memory.get_slice(from, len))
-    };
 
-    let ret = Keccak256::digest(data.as_ref());
-    push_h256!(machine, H256::from_slice(ret.as_slice()));
+        use tiny_keccak::{Hasher, Keccak};
+
+        let mut keccak = Keccak::v256();
+        keccak.update(machine.memory.get_slice(from, len));
+        if machine.stack.len()+1 > STACK_LIMIT {
+            return Return::StackUnderflow;
+        }
+        let new_push = unsafe { machine.stack.push_get_unsafe()};
+
+        let mut output = [0u8; 32];
+        keccak.finalize(&mut output);
+        *new_push = U256::from_big_endian(&output);
+    };
 
     Return::Continue
 }
@@ -153,8 +158,8 @@ pub fn extcodecopy<H: Host, SPEC: Spec>(machine: &mut Machine, host: &mut H) -> 
     pop!(machine, memory_offset, code_offset, len_u256);
 
     let (code, is_cold) = host.code(address);
-    gas_or_fail!(machine, gas::extcodecopy_cost::<SPEC>(len_u256, is_cold));
     let len = as_usize_or_fail!(len_u256, Return::OutOfGas);
+    gas_or_fail!(machine, gas::extcodecopy_cost::<SPEC>(len as u64, is_cold));
     if len == 0 {
         return Return::Continue;
     }
@@ -181,8 +186,8 @@ pub fn returndatasize<SPEC: Spec>(machine: &mut Machine) -> Return {
 pub fn returndatacopy<SPEC: Spec>(machine: &mut Machine) -> Return {
     check!(SPEC::enabled(BYZANTINE)); // EIP-211: New opcodes: RETURNDATASIZE and RETURNDATACOPY
     pop!(machine, memory_offset, offset, len);
-    gas_or_fail!(machine, gas::verylowcopy_cost(len));
     let len = as_usize_or_fail!(len, Return::OutOfGas);
+    gas_or_fail!(machine, gas::verylowcopy_cost(len as u64));
     let memory_offset = as_usize_or_fail!(memory_offset, Return::OutOfGas);
     let data_offset = as_usize_saturated!(offset);
     memory_resize!(machine, memory_offset, len);
@@ -273,8 +278,8 @@ pub fn log<H: Host, SPEC: Spec>(machine: &mut Machine, n: u8, host: &mut H) -> R
     check!(!SPEC::IS_STATIC_CALL);
 
     pop!(machine, offset, len);
-    gas_or_fail!(machine, gas::log_cost(n, len));
     let len = as_usize_or_fail!(len, Return::OutOfGas);
+    gas_or_fail!(machine, gas::log_cost(n, len as u64));
     let data = if len == 0 {
         Bytes::new()
     } else {

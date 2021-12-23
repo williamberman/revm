@@ -88,6 +88,13 @@ impl Stack {
         *self.data.get_unchecked(len)
     }
 
+    pub unsafe fn push_get_unsafe(&mut self) -> &mut U256 {
+        let mut len = self.data.len();
+        len += 1;
+        self.data.set_len(len);
+        self.data.get_unchecked_mut(len-1)
+    }
+
     #[inline(always)]
     pub unsafe fn pop2_unsafe(&mut self) -> (U256, U256) {
         let mut len = self.data.len();
@@ -161,14 +168,14 @@ impl Stack {
     #[inline(always)]
     pub fn dup<const N: usize>(&mut self) -> Return {
         let len = self.data.len();
+        let new_len = self.data.len()+1;
         if len < N {
             Return::StackUnderflow
-        } else if len + 1 > STACK_LIMIT {
+        } else if new_len > STACK_LIMIT {
             Return::StackOverflow
         } else {
             unsafe {
                 *self.data.get_unchecked_mut(len) = *self.data.get_unchecked(len - N);
-                let new_len = len + 1;
                 self.data.set_len(new_len);
             }
             Return::Continue
@@ -202,25 +209,44 @@ impl Stack {
             self.data.set_len(new_len);
         }
 
-        let slot = self.data.get_mut(new_len - 1).unwrap();
-        slot.0 = [0u64; 4];
-        let mut dangling = [0u8; 8];
+        let slot = unsafe { self.data.get_unchecked_mut(new_len - 1) };
+
+        #[cfg(target_endian = "big")]
+        {
+            x
+        }
+        #[cfg(not(target_endian = "big"))]
+        {}
+
         if N < 8 {
+            let mut dangling = [0u8; 8];
             dangling[8 - N..].copy_from_slice(slice);
             slot.0[0] = u64::from_be_bytes(dangling);
+            slot.0[1] = 0;
+            slot.0[2] = 0;
+            slot.0[3] = 0;
         } else if N < 16 {
             slot.0[0] = u64::from_be_bytes(*arrayref::array_ref!(slice, N - 8, 8));
             if N != 8 {
+                let mut dangling = [0u8; 8];
                 dangling[8 * 2 - N..].copy_from_slice(&slice[..N - 8]);
                 slot.0[1] = u64::from_be_bytes(dangling);
+            } else {
+                slot.0[1] = 0;
             }
+            slot.0[2] = 0;
+            slot.0[3] = 0;
         } else if N < 24 {
             slot.0[0] = u64::from_be_bytes(*arrayref::array_ref!(slice, N - 8, 8));
             slot.0[1] = u64::from_be_bytes(*arrayref::array_ref!(slice, N - 16, 8));
             if N != 16 {
+                let mut dangling = [0u8; 8];
                 dangling[8 * 3 - N..].copy_from_slice(&slice[..N - 16]);
                 slot.0[2] = u64::from_be_bytes(dangling);
+            } else {
+                slot.0[2] = 0;
             }
+            slot.0[3] = 0;
         } else {
             // M<32
             slot.0[0] = u64::from_be_bytes(*arrayref::array_ref!(slice, N - 8, 8));
@@ -229,8 +255,11 @@ impl Stack {
             if N == 32 {
                 slot.0[3] = u64::from_be_bytes(*arrayref::array_ref!(slice, 0, 8));
             } else if N != 24 {
+                let mut dangling = [0u8; 8];
                 dangling[8 * 4 - N..].copy_from_slice(&slice[..N - 24]);
                 slot.0[3] = u64::from_be_bytes(dangling);
+            } else {
+                slot.0[3] = 0;
             }
         }
         Return::Continue

@@ -8,7 +8,7 @@ use core::ops::Range;
 use super::{contract::Contract, memory::Memory, stack::Stack};
 use crate::{spec::Spec, Host};
 
-pub const STACK_LIMIT: u64 = 1024;
+pub const STACK_LIMIT: usize = 1024;
 pub const CALL_STACK_LIMIT: u64 = 1024;
 
 pub struct Machine {

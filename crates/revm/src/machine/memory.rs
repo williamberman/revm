@@ -54,6 +54,7 @@ impl Memory {
     /// Get memory region at given offset. Dont check offset and size
     #[inline(always)]
     pub fn get_slice(&self, offset: usize, size: usize) -> &[u8] {
+        assert!(offset + size <= self.data.len());
         &self.data[offset..offset + size]
     }
 

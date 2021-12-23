@@ -11,8 +11,8 @@ pub fn codesize(machine: &mut Machine) -> Return {
 
 pub fn codecopy(machine: &mut Machine) -> Return {
     pop!(machine, memory_offset, code_offset, len);
-    gas_or_fail!(machine, gas::verylowcopy_cost(len));
     let len = as_usize_or_fail!(len, Return::OutOfGas);
+    gas_or_fail!(machine, gas::verylowcopy_cost(len as u64));
     if len == 0 {
         return Return::Continue;
     }
@@ -59,8 +59,8 @@ pub fn calldatasize(machine: &mut Machine) -> Return {
 
 pub fn calldatacopy(machine: &mut Machine) -> Return {
     pop!(machine, memory_offset, data_offset, len);
-    gas_or_fail!(machine, gas::verylowcopy_cost(len));
     let len = as_usize_or_fail!(len, Return::OutOfGas);
+    gas_or_fail!(machine, gas::verylowcopy_cost(len as u64));
     if len == 0 {
         return Return::Continue;
     }
