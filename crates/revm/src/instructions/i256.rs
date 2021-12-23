@@ -608,12 +608,15 @@ pub fn i256_div(mut first: U256, mut second: U256) -> U256 {
     //let mut d: U256 = U256(d.to_uint_array());
 
     //let mut d = first/second;
-    let mut d = div_u256::div_mod(first, second).0;
+    //let mut d = div_u256::div_mod(first, second).0;
     //let mut d = U256(inner_zkp_u256::div_rem(&first.0, &second.0));
 
     //let first = zkp_u256::U256::from_limbs(first.0);
     //let second = zkp_u256::U256::from_limbs(second.0);
     //let mut d = U256(*(first / second).as_limbs());
+
+    let t = unsafe { crate::fast_div_rem(first.as_ref().as_ptr(),second.as_ref().as_ptr())};
+    let mut d = U256([t.n1,t.n2,t.n3,t.n4]);
 
     u256_remove_sign(&mut d);
     //set sign bit to zero
