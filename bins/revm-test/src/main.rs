@@ -24,22 +24,33 @@ pub fn simple_example() {
         TransactTo::Call(H160::from_str("0x0000000000000000000000000000000000000000").unwrap());
     evm.env.tx.data = Bytes::from(hex::decode("30627b7c").unwrap());
 
+    // some dummy work to speedup CPU before doing benchmark tests.
+    let mut temp: u64 = 0;
+    let mut i = u32::MAX;
+    while i > 0 {
+        i -= temp as u32%1000;
+        temp += i as u64;
+    }
+
     let mut elapsed = std::time::Duration::ZERO;
     let mut times = Vec::new();
-    for _ in 0..10 {
+    for _ in 0..20 {
         let timer = Instant::now();
         let (_, _, _, _) = evm.transact();
         let i = timer.elapsed();
         times.push(i);
         elapsed += i;
     }
-    println!("elapsed: {:?}", elapsed / 10);
+    println!("test:{}", temp);
+    println!("mean: {:?}", elapsed / 20);
+    let mut sorted = times.clone();
+    sorted.sort();
+    println!("median: {:?}",(sorted[9]+sorted[10])/2);
     for (i, time) in times.iter().enumerate() {
         println!("{}: {:?}", i, time);
     }
 }
 
 fn main() {
-    println!("Hello, world!");
     simple_example();
 }
