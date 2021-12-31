@@ -98,7 +98,7 @@ impl Contract {
         while i < code.len() {
             let opcode = code[i] as u8;
             let info = &opcode_gas[opcode as usize];
-            gas_in_block += info.gas;
+            gas_in_block = gas_in_block.saturating_add(info.gas);
 
             if info.gas_block_end {
                 if first_gas_block.is_some() {

@@ -32,10 +32,16 @@ tokio = { version = "1.14", features = [
     "macros",
 ], optional = true }
 web3 = { version = "0.17", optional = true }
+cxx = "1.0"
 lazy_static = "1.4"
 
 [dev-dependencies]
 hex = "0.4"
+
+[build-dependencies]
+bindgen = "0.59.2"
+cc = "1.0"
+
 
 [features]
 default = ["std", "ecrecover"]

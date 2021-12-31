@@ -16,7 +16,9 @@ pub fn div(op1: U256, op2: U256) -> U256 {
 
         //U256(super::i256::inner_zkp_u256::div_rem(&op1.0, &op2.0))
 
-        super::i256::div_u256::div_mod(op1, op2).0
+        //super::i256::div_u256::div_mod(op1, op2).0
+        let t = unsafe { crate::fast_div_rem(op1.as_ref().as_ptr(),op2.as_ref().as_ptr())};
+        U256([t.n1,t.n2,t.n3,t.n4])
     }
 }
 
