@@ -60,9 +60,15 @@ impl<DB: Database> Inspector<DB> for CustomPrintTracer {
             //hex::encode(machine.memory.data()),
         );
 
-        self.reduced_gas_block += info.gas;
+        println!("opcode info:{:?}",info);
         if info.gas_block_end {
-            self.full_gas_block = machine.contract.gas_block(machine.program_counter());
+            let gas_block = machine.contract.gas_block(machine.program_counter());
+
+            println!("block_gas:{:?}",gas_block);
+            self.full_gas_block = gas_block;
+            self.reduced_gas_block = 0;
+        } else {
+            self.reduced_gas_block += info.gas;
         }
 
         Return::Continue
