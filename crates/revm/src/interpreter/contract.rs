@@ -18,7 +18,7 @@ pub struct Contract {
     /// Value send to contract.
     pub value: U256,
     /// Precomputed valid jump addresses
-    jumpdest: ValidJumpAddress,
+    analysis: ByteCodeAnalysis,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -29,28 +29,28 @@ pub enum Analazis {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct AnalazisData {
+pub struct InstructureAnalysis {
     pub analazis: Analazis,
     pub gas_block: u64,
 }
 
-impl AnalazisData {
+impl InstructureAnalysis {
     pub fn none() -> Self {
-        AnalazisData {
+        InstructureAnalysis {
             analazis: Analazis::None,
             gas_block: 0,
         }
     }
 
     pub fn jump_dest() -> Self {
-        AnalazisData {
+        InstructureAnalysis {
             analazis: Analazis::JumpDest,
             gas_block: 0,
         }
     }
 
     pub fn gas_block_end() -> Self {
-        AnalazisData {
+        InstructureAnalysis {
             analazis: Analazis::GasBlockEnd,
             gas_block: 0,
         }
@@ -70,7 +70,7 @@ impl Contract {
         value: U256,
     ) -> Self {
         let code_size = code.len();
-        let (jumpdest, code) = Self::analize::<SPEC>(code.as_ref());
+        let (analysis, code) = Self::analize::<SPEC>(code.as_ref());
 
         let code = code.into();
         Self {
@@ -80,15 +80,15 @@ impl Contract {
             address,
             caller,
             value,
-            jumpdest,
+            analysis,
         }
     }
 
     /// Create a new valid mapping from given code bytes.
     /// it gives back ValidJumpAddress and size od needed paddings.
-    fn analize<SPEC: Spec>(code: &[u8]) -> (ValidJumpAddress, Vec<u8>) {
-        let mut jumps: Vec<AnalazisData> = Vec::with_capacity(code.len());
-        jumps.resize(code.len(), AnalazisData::none());
+    fn analize<SPEC: Spec>(code: &[u8]) -> (ByteCodeAnalysis, Vec<u8>) {
+        let mut jumps: Vec<InstructureAnalysis> = Vec::with_capacity(code.len());
+        jumps.resize(code.len(), InstructureAnalysis::none());
         //let opcode_gas = LONDON_OPCODES;
         let opcode_gas = spec_opcode_gas(SPEC::SPEC_ID);
         let mut i = 0;
@@ -126,25 +126,25 @@ impl Contract {
         let padding = i - code.len();
         // +1 is for forced STOP opcode at the end of contract, it is precausion
         // if there is none, and if there is STOP our additional opcode will do nothing.
-        jumps.resize(jumps.len() + padding + 1, AnalazisData::none());
+        jumps.resize(jumps.len() + padding + 1, InstructureAnalysis::none());
         let mut code = code.to_vec();
         code.resize(code.len() + padding + 1, 0);
 
         (
-            ValidJumpAddress::new(jumps, first_gas_block.unwrap_or_default()),
+            ByteCodeAnalysis::new(jumps, first_gas_block.unwrap_or_default()),
             code,
         )
     }
 
     pub fn is_valid_jump(&self, possition: usize) -> bool {
-        self.jumpdest.is_valid(possition)
+        self.analysis.is_valid(possition)
     }
 
     pub fn gas_block(&self, possition: usize) -> u64 {
-        self.jumpdest.gas_block(possition)
+        self.analysis.gas_block(possition)
     }
     pub fn first_gas_block(&self) -> u64 {
-        self.jumpdest.first_gas_block
+        self.analysis.first_gas_block
     }
 
     pub fn new_with_context<SPEC: Spec>(
@@ -164,13 +164,13 @@ impl Contract {
 
 /// Mapping of valid jump destination from code.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ValidJumpAddress {
+pub struct ByteCodeAnalysis {
     first_gas_block: u64,
-    analazis: Vec<AnalazisData>,
+    analazis: Vec<InstructureAnalysis>,
 }
 
-impl ValidJumpAddress {
-    pub fn new(analazis: Vec<AnalazisData>, first_gas_block: u64) -> Self {
+impl ByteCodeAnalysis {
+    pub fn new(analazis: Vec<InstructureAnalysis>, first_gas_block: u64) -> Self {
         Self {
             analazis,
             first_gas_block,
