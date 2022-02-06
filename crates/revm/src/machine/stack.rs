@@ -9,9 +9,10 @@ pub struct Stack {
     data: Vec<U256>,
 }
 
-use std::fmt::{Display, Error, Formatter};
-impl Display for Stack {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+
+#[cfg(feature = "std")]
+impl std::fmt::Display for Stack {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         if self.data.is_empty() {
             f.write_str("[]")?;
         } else {
@@ -37,6 +38,7 @@ impl Stack {
     /// Create a new stack with given limit.
     pub fn new() -> Self {
         Self {
+            // Safety: A lot of functions assumes that capacity is STACK_LIMIT
             data: Vec::with_capacity(STACK_LIMIT),
         }
     }
@@ -64,7 +66,6 @@ impl Stack {
         if len < 1 {
             return Return::StackUnderflow;
         }
-        self.data.pop();
         unsafe {
             self.data.set_len(len - 1);
         }
@@ -79,9 +80,6 @@ impl Stack {
     }
 
     #[inline(always)]
-    /**** SAFETY ********
-     * caller is responsible to check length of array
-     */
     pub unsafe fn pop_unsafe(&mut self) -> U256 {
         let mut len = self.data.len();
         len -= 1;
@@ -90,6 +88,7 @@ impl Stack {
     }
 
     #[inline(always)]
+    /// Safety: caller is responsible to check length of array
     pub unsafe fn pop2_unsafe(&mut self) -> (U256, U256) {
         let mut len = self.data.len();
         len -= 2;
@@ -101,6 +100,7 @@ impl Stack {
     }
 
     #[inline(always)]
+    /// Safety: caller is responsible to check length of array
     pub unsafe fn pop3_unsafe(&mut self) -> (U256, U256, U256) {
         let mut len = self.data.len();
         len -= 3;
@@ -113,6 +113,7 @@ impl Stack {
     }
 
     #[inline(always)]
+    /// Safety: caller is responsible to check length of array
     pub unsafe fn pop4_unsafe(&mut self) -> (U256, U256, U256, U256) {
         let mut len = self.data.len();
         len -= 4;
@@ -167,10 +168,10 @@ impl Stack {
         } else if len + 1 > STACK_LIMIT {
             Return::StackOverflow
         } else {
+            // Safety: check for out of bounds is done above and it makes this safe to do.
             unsafe {
                 *self.data.get_unchecked_mut(len) = *self.data.get_unchecked(len - N);
-                let new_len = len + 1;
-                self.data.set_len(new_len);
+                self.data.set_len(len + 1);
             }
             Return::Continue
         }
@@ -182,7 +183,7 @@ impl Stack {
         if len <= N {
             return Return::StackUnderflow;
         }
-        // SAFETY: length is checked before so we are okay to switch bytes in unsafe way.
+        // Safety: length is checked before so we are okay to switch bytes in unsafe way.
         unsafe {
             let pa: *mut U256 = self.data.get_unchecked_mut(len - 1);
             let pb: *mut U256 = self.data.get_unchecked_mut(len - 1 - N);
@@ -199,11 +200,13 @@ impl Stack {
             return Return::StackOverflow;
         }
 
+        let slot;
+        // Safety: check above ensures us that we are okey in increment len. 
         unsafe {
             self.data.set_len(new_len);
+            slot = self.data.get_unchecked_mut(new_len - 1);
         }
 
-        let slot = self.data.get_mut(new_len - 1).unwrap();
         slot.0 = [0u64; 4];
         let mut dangling = [0u8; 8];
         if N < 8 {

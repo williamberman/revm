@@ -77,6 +77,7 @@ macro_rules! pop_address {
             return Return::StackUnderflow;
         }
         let mut temp = H256::zero();
+        // Safery: Length is checked above.
         let $x1: H160 = {
             unsafe {
                 $machine
@@ -93,6 +94,7 @@ macro_rules! pop_address {
         }
         let mut temp = H256::zero();
         $x1: H160 = {
+            // Safery: Length is checked above.
             unsafe {
                 $machine
                     .stack
@@ -103,6 +105,7 @@ macro_rules! pop_address {
         };
         $x2: H160 = {
             temp = H256::zero();
+            // Safery: Length is checked above.
             unsafe {
                 $machine
                     .stack
@@ -119,18 +122,21 @@ macro_rules! pop {
         if $machine.stack.len() < 1 {
             return Return::StackUnderflow;
         }
+        // Safery: Length is checked above.
         let $x1 = unsafe { $machine.stack.pop_unsafe() };
     };
     ( $machine:expr, $x1:ident, $x2:ident) => {
         if $machine.stack.len() < 2 {
             return Return::StackUnderflow;
         }
+        // Safery: Length is checked above.
         let ($x1, $x2) = unsafe { $machine.stack.pop2_unsafe() };
     };
     ( $machine:expr, $x1:ident, $x2:ident, $x3:ident) => {
         if $machine.stack.len() < 3 {
             return Return::StackUnderflow;
         }
+        // Safery: Length is checked above.
         let ($x1, $x2, $x3) = unsafe { $machine.stack.pop3_unsafe() };
     };
 
@@ -138,6 +144,7 @@ macro_rules! pop {
         if $machine.stack.len() < 4 {
             return Return::StackUnderflow;
         }
+        // Safery: Length is checked above.
         let ($x1, $x2, $x3, $x4) = unsafe { $machine.stack.pop4_unsafe() };
     };
 }

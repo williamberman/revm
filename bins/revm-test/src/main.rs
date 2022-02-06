@@ -21,7 +21,7 @@ pub fn simple_example() {
 
     let mut elapsed = std::time::Duration::ZERO;
     let mut times = Vec::new();
-    for _ in 0..1 {
+    for _ in 0..10 {
         let timer = Instant::now();
         let (_, _, _, _, _) = evm.transact();
         let i = timer.elapsed();
