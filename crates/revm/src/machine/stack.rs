@@ -64,6 +64,7 @@ impl Stack {
         if len < 1 {
             return Return::StackUnderflow;
         }
+        self.data.pop();
         unsafe {
             self.data.set_len(len - 1);
         }

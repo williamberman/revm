@@ -250,40 +250,28 @@ macro_rules! op3_u256_fn {
 
 macro_rules! as_usize_saturated {
     ( $v:expr ) => {{
-        if unsafe {
-            *$v.0.get_unchecked(1) != 0
-                || *$v.0.get_unchecked(2) != 0
-                || *$v.0.get_unchecked(3) != 0
-        } {
+        if $v.0[1] != 0 || $v.0[2] != 0 || $v.0[3] != 0 {
             usize::MAX
         } else {
-            unsafe { *$v.0.get_unchecked(0) as usize }
+            $v.0[0] as usize
         }
     }};
 }
 
 macro_rules! as_usize_or_fail {
     ( $v:expr ) => {{
-        if unsafe {
-            *$v.0.get_unchecked(1) != 0
-                || *$v.0.get_unchecked(2) != 0
-                || *$v.0.get_unchecked(3) != 0
-        } {
+        if $v.0[1] != 0 || $v.0[2] != 0 || $v.0[3] != 0 {
             return Return::OutOfGas;
         }
 
-        unsafe { *$v.0.get_unchecked(0) as usize }
+        $v.0[0] as usize
     }};
 
     ( $v:expr, $reason:expr ) => {{
-        if unsafe {
-            *$v.0.get_unchecked(1) != 0
-                || *$v.0.get_unchecked(2) != 0
-                || *$v.0.get_unchecked(3) != 0
-        } {
+        if $v.0[1] != 0 || $v.0[2] != 0 || $v.0[3] != 0 {
             return $reason;
         }
 
-        unsafe { *$v.0.get_unchecked(0) as usize }
+        $v.0[0] as usize
     }};
 }
