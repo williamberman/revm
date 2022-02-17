@@ -429,7 +429,6 @@ mod tests {
         assert_eq!(i256_div(one_hundred, two), fifty);
     }
 
-    #[cfg(std)]
     #[test]
     fn benchmark_div() {
         use super::*;
@@ -437,11 +436,11 @@ mod tests {
         let mut f = U256([1, 100, 1, 1]);
         let mut s = U256([0, 0, 10, 0]);
 
-        let time = core::time::Instant::now();
+        //let time = std::time::Instant::now();
         for i in 0..1_000_000 {
             f.0[1] = i;
             s.0[3] = div_u256::div_mod(f, s).0 .0[3];
         }
-        println!("TIME:{:?}", time.elapsed());
+        //println!("TIME:{:?}", time.elapsed());
     }
 }

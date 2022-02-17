@@ -9,7 +9,6 @@ pub struct Stack {
     data: Vec<U256>,
 }
 
-
 #[cfg(feature = "std")]
 impl std::fmt::Display for Stack {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
@@ -85,6 +84,32 @@ impl Stack {
         len -= 1;
         self.data.set_len(len);
         *self.data.get_unchecked(len)
+    }
+
+    #[inline(always)]
+    pub unsafe fn top_unsafe(&mut self) -> &mut U256 {
+        let len = self.data.len();
+        self.data.get_unchecked_mut(len - 1)
+    }
+
+    #[inline(always)]
+    pub unsafe fn pop_top_unsafe(&mut self) -> (U256, &mut U256) {
+        let mut len = self.data.len();
+        let pop = *self.data.get_unchecked(len - 1);
+        len -= 1;
+        self.data.set_len(len);
+
+        (pop, self.data.get_unchecked_mut(len-1))
+    }
+    #[inline(always)]
+    pub unsafe fn pop2_top_unsafe(&mut self) -> (U256, U256, &mut U256) {
+        let mut len = self.data.len();
+        let pop1 = *self.data.get_unchecked(len - 1);
+        let pop2 = *self.data.get_unchecked(len - 2);
+        len -= 2;
+        self.data.set_len(len);
+
+        (pop1, pop2, self.data.get_unchecked_mut(len-1))
     }
 
     #[inline(always)]
@@ -201,7 +226,7 @@ impl Stack {
         }
 
         let slot;
-        // Safety: check above ensures us that we are okey in increment len. 
+        // Safety: check above ensures us that we are okey in increment len.
         unsafe {
             self.data.set_len(new_len);
             slot = self.data.get_unchecked_mut(new_len - 1);
