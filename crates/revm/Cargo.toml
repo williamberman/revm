@@ -25,9 +25,14 @@ tokio = { version = "1.14", features = ["rt-multi-thread", "macros"], optional =
 web3 = { version = "0.17", optional = true }
 #crypto-bigint = "0.3"
 zkp-u256 = "0.2.1"
+cxx = "1.0"
 
 [dev-dependencies]
 hex = "0.4"
+
+[build-dependencies]
+bindgen = "0.59.2"
+cc = "1.0"
 
 [features]
 default = ["std", "secp256k1"]

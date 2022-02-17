@@ -99,7 +99,7 @@ impl Stack {
         len -= 1;
         self.data.set_len(len);
 
-        (pop, self.data.get_unchecked_mut(len-1))
+        (pop, self.data.get_unchecked_mut(len - 1))
     }
     #[inline(always)]
     pub unsafe fn pop2_top_unsafe(&mut self) -> (U256, U256, &mut U256) {
@@ -109,7 +109,7 @@ impl Stack {
         len -= 2;
         self.data.set_len(len);
 
-        (pop1, pop2, self.data.get_unchecked_mut(len-1))
+        (pop1, pop2, self.data.get_unchecked_mut(len - 1))
     }
 
     #[inline(always)]

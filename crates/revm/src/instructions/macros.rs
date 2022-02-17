@@ -250,7 +250,7 @@ macro_rules! op2_u256_fn {
 
         pop_top!($machine, op1, op2);
         *op2 = $op(op1, *op2);
-        
+
         Return::Continue
     }};
     ( $machine:expr, $op:path, $enabled:expr) => {{
