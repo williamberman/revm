@@ -5,7 +5,7 @@ members = [
     "bins/*",
     "crates/*",
 ]
-default-members = ["crates/revm"]
+default-members = ["crates/revm", "crates/sym_exec"]
 
 [profile.release]
 # debug = true

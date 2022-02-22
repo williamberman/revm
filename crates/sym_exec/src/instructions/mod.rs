@@ -1,47 +1,7 @@
-use primitive_types::U256;
+mod arithmetic;
+
 use revm::{Host, Return, Spec, opcode};
-
-pub struct Machine {
-    pub program_counter: *const u8,
-    pub stack: Stack,
-}
-
-pub struct Stack {
-}
-
-impl Stack {
-    pub fn len(&self) -> usize {
-        todo!()
-    }
-
-   unsafe fn pop_top_unsafe(&mut self) -> (U256, &mut U256) {
-       todo!()
-   }
-}
-
-impl Machine {
-    /// loop steps until we are finished with execution
-    /// See additional comments in `crates/revm/src/machine/machine.rs`
-    pub fn run<H: Host, SPEC: Spec>(&mut self, host: &mut H) -> Return {
-        let mut ret = Return::Continue;
-
-        while ret == Return::Continue {
-            let opcode = unsafe { *self.program_counter };
-            self.program_counter = unsafe { self.program_counter.offset(1) };
-            ret = eval::<H, SPEC>(opcode, self, host);
-        }
-        ret
-    }
-}
-
-#[inline(always)]
-pub fn add(machine: &mut Machine) -> Return {
-    pop_top!(machine, op1, op2);
-    let (ret, ..) = op1.overflowing_add(*op2);
-    *op2 = ret;
-
-    Return::Continue
-}
+use crate::machine::machine::Machine;
 
 #[inline(always)]
 pub fn eval<H: Host, S: Spec>(opcode: u8, machine: &mut Machine, _host: &mut H) -> Return {
@@ -55,7 +15,7 @@ pub fn eval<H: Host, S: Spec>(opcode: u8, machine: &mut Machine, _host: &mut H) 
         246_u8..=249_u8 => Return::OpcodeNotFound,
         251_u8..=252_u8 => Return::OpcodeNotFound,*/
         opcode::STOP => Return::Stop,
-        opcode::ADD => add(machine),
+        opcode::ADD => arithmetic::add(machine),
         // opcode::MUL => op2_u256_tuple!(machine, overflowing_mul),
         // opcode::SUB => op2_u256_tuple!(machine, overflowing_sub),
         // opcode::DIV => op2_u256_fn!(machine, arithmetic::div),
