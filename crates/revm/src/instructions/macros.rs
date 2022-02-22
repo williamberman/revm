@@ -149,6 +149,7 @@ macro_rules! pop {
     };
 }
 
+#[macro_export]
 macro_rules! pop_top {
     ( $machine:expr, $x1:ident) => {
         if $machine.stack.len() < 1 {

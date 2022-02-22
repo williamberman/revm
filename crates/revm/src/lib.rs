@@ -6,7 +6,7 @@ mod evm;
 mod evm_impl;
 mod inspector;
 mod instructions;
-mod machine;
+pub mod machine;
 mod models;
 mod spec;
 mod subroutine;

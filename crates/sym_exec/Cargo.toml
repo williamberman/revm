@@ -1,0 +1,13 @@
+[package]
+authors = ["Will Berman <will@paradigm.xyz>"]
+description = "REVM Symbolic Execution lib"
+edition = "2018"
+keywords = ["no_std", "ethereum", "evm"]
+license = "MIT"
+name = "sym_exec"
+repository = "https://github.com/bluealloy/revm"
+version = "0.0.0"
+
+[dependencies]
+revm = { path = "../revm" }
+primitive-types = { version = "0.10", default-features = false, features = ["rlp"] }
