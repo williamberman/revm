@@ -11,3 +11,4 @@ version = "0.0.0"
 [dependencies]
 revm = { path = "../revm" }
 primitive-types = { version = "0.10", default-features = false, features = ["rlp"] }
+amzn-smt-ir = { git = "https://github.com/awslabs/rust-smt-ir", version = "0.1", branch="main" }

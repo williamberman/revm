@@ -1,2 +1,2 @@
 pub mod machine;
-mod stack;
+pub mod stack;

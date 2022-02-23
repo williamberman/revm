@@ -2,9 +2,10 @@ mod arithmetic;
 
 use revm::{Host, Return, Spec, opcode};
 use crate::machine::machine::Machine;
+use crate::machine::stack::Stack;
 
 #[inline(always)]
-pub fn eval<H: Host, S: Spec>(opcode: u8, machine: &mut Machine, _host: &mut H) -> Return {
+pub fn eval<H: Host, S: Spec, IStack: Stack>(opcode: u8, machine: &mut Machine<IStack>, _host: &mut H) -> Return {
     match opcode {
         /*12_u8..=15_u8 => Return::OpcodeNotFound,
         30_u8..=31_u8 => Return::OpcodeNotFound,
