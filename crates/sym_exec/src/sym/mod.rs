@@ -1,3 +1,5 @@
+mod z3;
+
 use primitive_types::U256;
 
 pub enum SymWord {
@@ -17,8 +19,11 @@ impl From<U256> for SymWord {
     }
 }
 
+#[derive(Debug)]
 pub enum IR {
     ADD(Box<IR>, Box<IR>),
+    EqZero(Box<IR>),
+    NotEqZero(Box<IR>),
     Base(U256)
 }
 
